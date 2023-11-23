@@ -98,7 +98,7 @@ func ShowTask(ctx *gin.Context) {
 	}
 
 	// Render task
-	ctx.HTML(http.StatusOK, "task.html", task)  // Modify it!!
+	ctx.HTML(http.StatusOK, "task.html", task)
 }
 
 func RegisterTask(ctx *gin.Context) {
