@@ -202,6 +202,11 @@ func UpdateTask(ctx *gin.Context){
         return
     }
 
+    importance, exist := ctx.GetPostForm("importance")
+    if !exist {
+        Error(http.StatusBadRequest, "No is_done is given")(ctx)
+        return
+    }
 
 	db, err := database.GetConnection()
     if err != nil {
@@ -215,8 +220,8 @@ func UpdateTask(ctx *gin.Context){
         return
     }         
 
-    _, err = db.Exec("UPDATE tasks SET title = ?, is_done = ? WHERE id = ?",
-							title, b, id)
+    _, err = db.Exec("UPDATE tasks SET title = ?, is_done = ?, importance = ? WHERE id = ?",
+							title, b, importance, id)
     if err != nil {
         Error(http.StatusInternalServerError, err.Error())(ctx)
 		//fmt.Println("here1 is error!!!!!!!!!!!!!!!!")
