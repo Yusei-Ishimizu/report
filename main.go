@@ -57,12 +57,16 @@ func main() {
 	// ユーザ登録
 	engine.GET("/user/new", service.NewUserForm)
 	engine.POST("/user/new", service.RegisterUser)
-
+	//ログイン
 	engine.GET("/login", service.NewLoginForm)
 	engine.POST("/login", service.Login)
-
+	//ログアウト、削除
 	engine.GET("/logout", service.Logout)
 	engine.GET("/user/delete", service.DeleteUser)
+
+	//ユーザ編集
+	engine.GET("/user/edit", service.EditUser)
+	engine.POST("/user/edit", service.UpdateUser)
 
 	// start server
 	engine.Run(fmt.Sprintf(":%d", port))

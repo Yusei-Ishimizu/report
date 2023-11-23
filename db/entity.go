@@ -18,4 +18,6 @@ type User struct {
     ID        uint64    `db:"id"`
     Name      string    `db:"name"`
     Password  []byte    `db:"password"`
+	UpdatedAt time.Time `db:"updated_at"`
+	CreatedAt time.Time `db:"created_at"`
 }

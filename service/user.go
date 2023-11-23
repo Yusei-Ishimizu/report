@@ -4,7 +4,8 @@ import (
 	"crypto/sha256"
     "encoding/hex"
     "net/http"
-    
+    "fmt" 
+    //"strconv"
     "github.com/gin-gonic/gin"
     "github.com/gin-contrib/sessions"
     database "todolist.go/db"
@@ -29,7 +30,7 @@ func RegisterUser(ctx *gin.Context) {
 	password_check := ctx.PostForm("password_check")
     switch {
     case username == "":
-        ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Usernane is not provided", "Username": username})
+        ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Username is not provided", "Username": username})
     case password == "":
         ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Password is not provided", "Password": password})
     case password_check == "":
@@ -165,4 +166,117 @@ func DeleteUser(ctx *gin.Context) {
 
     // Redirect to /list
     ctx.Redirect(http.StatusFound, "/")
+}
+
+func EditUser(ctx *gin.Context){
+    userID := sessions.Default(ctx).Get("user")
+
+    // Get DB connection
+    db, err := database.GetConnection()
+    if err != nil {
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+
+    // Get target user
+    var user database.User
+    err = db.Get(&user, "SELECT * FROM users WHERE id=?", userID)
+    if err != nil {
+        Error(http.StatusBadRequest, err.Error())(ctx)
+        return
+    }
+
+    // Render edit form
+    ctx.HTML(http.StatusOK, "form_edit_user.html",
+        gin.H{"Title": fmt.Sprintf("Edit user %d", user.Name), "User": user})
+}
+
+func UpdateUser(ctx *gin.Context){
+    userID := sessions.Default(ctx).Get("user")
+
+    username, exist := ctx.GetPostForm("new_name")
+    if !exist {
+        Error(http.StatusBadRequest, "No name is given")(ctx)
+        return
+    }
+
+    password, exist := ctx.GetPostForm("new_password")
+    if !exist {
+        Error(http.StatusBadRequest, "No new password is given")(ctx)
+        return
+    }
+
+    password_check, exist := ctx.GetPostForm("new_password_check")
+    if !exist {
+        Error(http.StatusBadRequest, "No check new password is given")(ctx)
+        return
+    }
+
+    now_password, exist := ctx.GetPostForm("now_password")
+    if !exist {
+        Error(http.StatusBadRequest, "No now password is given")(ctx)
+        return
+    }
+
+    db, err := database.GetConnection()
+    if err != nil {
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+
+    // ユーザの取得
+    var user database.User
+    err = db.Get(&user, "SELECT id, name, password FROM users WHERE name = ?", username)
+    if err != nil {
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+
+    // 重複チェック
+    var duplicate int
+    err = db.Get(&duplicate, "SELECT COUNT(*) FROM users WHERE name=? and NOT id = ?", username, userID)
+    if err != nil {
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+    if duplicate > 0 {
+        ctx.HTML(http.StatusBadRequest, "form_edit_user.html", gin.H{"Title": fmt.Sprintf("Edit user %d", user.Name), "User": user, "Error": "Username is already taken"})
+        return
+    }
+
+	// PWタイプミス確認
+	if password != password_check {
+		ctx.HTML(http.StatusBadRequest, "form_edit_user.html", gin.H{"Title": fmt.Sprintf("Edit user %d", user.Name), "User": user, "Error": "Password Typemiss"})
+        return
+	}
+
+    // パスワードの照合
+    if hex.EncodeToString(user.Password) != hex.EncodeToString(hash(now_password)) {
+        ctx.HTML(http.StatusBadRequest, "form_edit_user.html", gin.H{"Title": fmt.Sprintf("Edit user %d", user.Name), "User": user, "Error": "Incorect Password "})
+        return
+    }
+
+    _, err = db.Exec("UPDATE users SET name = ?, password = ? WHERE id = ?",
+                                        username, hash(password), userID)
+    if err != nil {
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+
+    ctx.Redirect(http.StatusFound, "/list")
+
+    /*
+	
+       
+
+    _, err = db.Exec("UPDATE tasks SET title = ?, is_done = ?, importance = ? WHERE id = ?",
+							title, b, importance, id)
+    if err != nil {
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+
+    path := fmt.Sprintf("/task/%d", id) 
+    ctx.Redirect(http.StatusFound, path)
+    */
 }
