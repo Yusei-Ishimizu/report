@@ -5,14 +5,14 @@
     <dd>{{ .ID }}</dd>
     <dt>Created at</dt>
     <dd>{{ .CreatedAt }}</dd>
+    <dt>Importance</dt>
+    <dd>{{ .Importance }}</dd>
     <dt>Status</dt>
     <dd><input type="checkbox" {{ if .IsDone }}checked {{ end }}disabled/>済</dd>
 </dl>
 <a href="/list"><button type="button">リストへ戻る</button></a>
 <a href ="/task/edit/{{ .ID }}"><button type ="button">編集</button></a>
 <!--
-この部分はブラウザに反映されません
-この部分はブラウザに反映されません
 <a href="/task/delete/{{ .ID }}"><button type="button">削除</button></a>
 -->
 <button type="button" onclick="confirm_delete({{ .ID }})">削除</button>

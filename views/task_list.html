@@ -19,13 +19,14 @@
 </script>
 
 
-
+<br>
 
 <form action="/list" method="GET">
     <input type="text" name="kw" value="{{ .Kw }}">
     <br>
     <input type="radio" name="is_done" value="not_is_done"> <label>未完了のタスクのみ表示</label>
     <input type="radio" name="is_done" value="all"> <label>全てのタスクを表示</label>
+    <input type="checkbox" name="importance" value="t"> <label>重要度順に表示</label>
     <input type="submit" value="検索">
 </form>
 
@@ -41,6 +42,7 @@
         <th>タイトル</th>
         <th>登録日</th>
         <th>状態</th>
+        <th>重要度</th>
     </tr>
     {{ range $task := .Tasks }}
     <tr>
@@ -48,6 +50,7 @@
         <td>{{ $task.Title }}</td>
         <td>{{ $task.CreatedAt }}</td>
         <td>{{ if $task.IsDone }}済{{ end }}</td>
+        <td>{{ $task.Importance }}</td>
     </tr>
     {{ end }}
 </table>

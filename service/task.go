@@ -28,7 +28,7 @@ func TaskList(ctx *gin.Context) {
 	// Get query parameter
 	kw := ctx.Query("kw")
     is_done := ctx.Query("is_done")
-
+    importance := ctx.Query("importance")
     
 
 	// Get tasks in DB
@@ -44,7 +44,7 @@ func TaskList(ctx *gin.Context) {
         } 
     }*/
       
-    query := "SELECT id, title, created_at, is_done FROM tasks INNER JOIN ownership ON task_id = id WHERE user_id = ?"
+    query := "SELECT id, title, created_at, is_done, importance FROM tasks INNER JOIN ownership ON task_id = id WHERE user_id = ?"
 
 	switch {
     case kw != "":
@@ -53,6 +53,11 @@ func TaskList(ctx *gin.Context) {
         }else{
             query = query + " AND title LIKE ?"
         }
+
+        if importance == "t"{
+            query = query + " ORDER BY importance DESC"
+        }
+
         err = db.Select(&tasks, query, userID, "%" + kw + "%")
     default:
         if is_done == "not_is_done"{
@@ -60,6 +65,11 @@ func TaskList(ctx *gin.Context) {
         }else{
             //err = db.Select(&tasks, query, userID)
         }
+
+        if importance == "t"{
+            query = query + " ORDER BY importance DESC"
+        }
+
         err = db.Select(&tasks, query, userID)
         
     }
@@ -111,6 +121,13 @@ func RegisterTask(ctx *gin.Context) {
         return
     }
 
+    // Get importance
+    importance, exist := ctx.GetPostForm("importance")
+    if !exist {
+        Error(http.StatusBadRequest, "No importance is given")(ctx)
+        return
+    }
+
     // Get DB connection
     db, err := database.GetConnection()
     if err != nil {
@@ -118,7 +135,7 @@ func RegisterTask(ctx *gin.Context) {
         return
     }
     tx := db.MustBegin()
-    result, err := tx.Exec("INSERT INTO tasks (title) VALUES (?)", title)
+    result, err := tx.Exec("INSERT INTO tasks (title, importance) VALUES (?, ?)", title, importance)
     if err != nil {
         tx.Rollback()
         Error(http.StatusInternalServerError, err.Error())(ctx)
