@@ -88,15 +88,15 @@ func ShowTask(ctx *gin.Context) {
 		Error(http.StatusBadRequest, err.Error())(ctx)
 		return
 	}
-
+    userID := sessions.Default(ctx).Get("user")
 	// Get a task with given ID
 	var task database.Task
-	err = db.Get(&task, "SELECT * FROM tasks WHERE id=?", id) // Use DB#Get for one entry
-	if err != nil {
+	//err = db.Get(&task, "SELECT * FROM tasks WHERE id=?", id) // Use DB#Get for one entry
+	err = db.Get(&task, "SELECT id, title, created_at, is_done, importance FROM tasks INNER JOIN ownership ON task_id = id WHERE user_id = ? AND id = ?",userID, id)
+    if err != nil {
 		Error(http.StatusBadRequest, err.Error())(ctx)
 		return
 	}
-
 	// Render task
 	ctx.HTML(http.StatusOK, "task.html", task)
 }
