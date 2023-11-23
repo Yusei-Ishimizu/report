@@ -1,0 +1,55 @@
+{{ template "header" . }}
+<h1>List of tasks</h1>
+
+<p><a href="/logout">ログアウト</a></p>
+<!--
+この部分はブラウザに反映されません
+この部分はブラウザに反映されません
+<p><a href="/user/delete">アカウント退会</a></p>
+-->
+
+
+<button type="button" onclick="confirm_delete()">アカウント削除</button>
+<script type="text/javascript">
+    const confirm_delete = () => {
+        if(window.confirm(`アカウントを削除します．よろしいですか？`)) {
+            location.href = `/user/delete`;
+        }
+    }
+</script>
+
+
+
+
+<form action="/list" method="GET">
+    <input type="text" name="kw" value="{{ .Kw }}">
+    <br>
+    <input type="radio" name="is_done" value="not_is_done"> <label>未完了のタスクのみ表示</label>
+    <input type="radio" name="is_done" value="all"> <label>全てのタスクを表示</label>
+    <input type="submit" value="検索">
+</form>
+
+
+
+<p><a href="/task/new">タスクの新規登録</a></p>
+{{ if not .Tasks }}
+<p>登録データがありません．</p>
+{{ else }}
+<table>
+    <tr>
+        <th>ID</th>
+        <th>タイトル</th>
+        <th>登録日</th>
+        <th>状態</th>
+    </tr>
+    {{ range $task := .Tasks }}
+    <tr>
+        <td><a href="/task/{{ $task.ID }}">{{ $task.ID }}</a></td>
+        <td>{{ $task.Title }}</td>
+        <td>{{ $task.CreatedAt }}</td>
+        <td>{{ if $task.IsDone }}済{{ end }}</td>
+    </tr>
+    {{ end }}
+</table>
+{{ end }}
+{{ template "footer" }}

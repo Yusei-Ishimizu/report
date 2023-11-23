@@ -1,0 +1,13 @@
+{{ template "header" . }}
+<h1>ユーザ登録</h1>
+{{ if .Error }}
+<p><font color="#FF0000">{{ .Error }}</font><p>
+{{ end }}
+<form action="/user/new" method="POST">
+    <label>ユーザ名: </label><input type="text" name="username" required><br>
+    <label>パスワード: </label><input type="text" name="password" required><br>
+    <label>パスワード確認欄: </label><input type="text" name="password_check" required><br>
+    <input type="submit" value="登録">
+</form>
+<p><a href="/">TOPへ戻る</a></p>
+{{ template "footer" }}
