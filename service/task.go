@@ -33,16 +33,6 @@ func TaskList(ctx *gin.Context) {
 
 	// Get tasks in DB
 	var tasks []database.Task
-
-    /*var b bool
-
-    if not_is_done != ""{
-        b, err = strconv.ParseBool(not_is_done)
-        if err != nil {
-            Error(http.StatusBadRequest, "somthing is error")(ctx)
-            return
-        } 
-    }*/
       
     query := "SELECT id, title, created_at, is_done, importance FROM tasks INNER JOIN ownership ON task_id = id WHERE user_id = ?"
 
