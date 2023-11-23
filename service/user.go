@@ -265,18 +265,8 @@ func UpdateUser(ctx *gin.Context){
 
     ctx.Redirect(http.StatusFound, "/list")
 
-    /*
-	
-       
-
-    _, err = db.Exec("UPDATE tasks SET title = ?, is_done = ?, importance = ? WHERE id = ?",
-							title, b, importance, id)
-    if err != nil {
-        Error(http.StatusInternalServerError, err.Error())(ctx)
-        return
-    }
-
-    path := fmt.Sprintf("/task/%d", id) 
-    ctx.Redirect(http.StatusFound, path)
-    */
+    // セッションの保存
+    session := sessions.Default(ctx)
+    session.Set(userkey, user.ID)
+    session.Save()
 }
