@@ -49,16 +49,18 @@ func TaskList(ctx *gin.Context) {
 	switch {
     case kw != "":
         if is_done == "not_is_done"{
-            err = db.Select(&tasks, query + " AND is_done = false AND title LIKE ?", userID, "%" + kw + "%")
+            query = query + " AND is_done = false AND title LIKE ?"
         }else{
-            err = db.Select(&tasks, query + " AND title LIKE ?", userID, "%" + kw + "%")
+            query = query + " AND title LIKE ?"
         }
+        err = db.Select(&tasks, query, userID, "%" + kw + "%")
     default:
         if is_done == "not_is_done"{
-            err = db.Select(&tasks, query + " AND is_done = false", userID)
+            query = query + " AND is_done = false"
         }else{
-            err = db.Select(&tasks, query, userID)
+            //err = db.Select(&tasks, query, userID)
         }
+        err = db.Select(&tasks, query, userID)
         
     }
     if err != nil {
