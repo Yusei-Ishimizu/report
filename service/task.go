@@ -237,6 +237,7 @@ func DeleteTask(ctx *gin.Context) {
     }
     // Delete the task from DB
     _, err = db.Exec("DELETE FROM tasks WHERE id=?", id)
+    _, err = db.Exec("DELETE FROM ownership WHERE task_id=?", id)
     if err != nil {
         Error(http.StatusInternalServerError, err.Error())(ctx)
         return
