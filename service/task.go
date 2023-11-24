@@ -160,9 +160,9 @@ func EditTaskForm(ctx *gin.Context) {
         Error(http.StatusInternalServerError, err.Error())(ctx)
         return
     }
-    // Get target task
+    userID := sessions.Default(ctx).Get("user")
     var task database.Task
-    err = db.Get(&task, "SELECT * FROM tasks WHERE id=?", id)
+    err = db.Get(&task, "SELECT id, title, created_at, is_done, importance FROM tasks INNER JOIN ownership ON task_id = id WHERE user_id = ? AND id = ?",userID, id)
     if err != nil {
         Error(http.StatusBadRequest, err.Error())(ctx)
         return

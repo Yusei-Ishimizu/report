@@ -155,7 +155,7 @@ func DeleteUser(ctx *gin.Context) {
         return
     }
 
-    _, err = tx.Exec("DELETE FROM ownership WHERE user_id=?", userID)
+    _, err = tx.Exec("DELETE o, t FROM ownership AS o INNER JOIN tasks t ON o.task_id=t.id WHERE o.user_id=?", userID)
     if err != nil {
         tx.Rollback()
         Error(http.StatusInternalServerError, err.Error())(ctx)
